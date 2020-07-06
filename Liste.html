@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>Click the button to make a BUTTON element with text.</p>
+
+<button onclick="myFunction()">Try it</button>
+
+<script>
+var data = {Batman:4.99, SpiderMan:22, Thanos: 8, Wolverine : "canadien"};
+function myFunction() {
+  var ul = document.createElement("UL");
+  let k;
+  var clefs = Object.keys(data);
+  for(k=0;k<clefs.length;k++){
+      let li = document.createElement("LI");
+      let button = document.createElement("BUTTON");
+      button.setAttribute('onclick','myFunction()');
+      let t_b = document.createTextNode('+');
+      button.appendChild(t_b);
+      li.appendChild(button);
+      let a = document.createElement("A");
+      let t_a = document.createTextNode(clefs[k]);
+      a.appendChild(t_a);
+      a.setAttribute('href','#');
+      li.appendChild(a);
+      let v = document.createElement("SPAN");
+      let value = document.createTextNode(data[clefs[k]]);
+      v.appendChild(value);
+      li.appendChild(v);
+      ul.appendChild(li);
+  }
+  document.body.appendChild(ul);
+}
+</script>
+
+</body>
+</html>
