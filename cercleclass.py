@@ -43,5 +43,22 @@ class Cercle :
             if self.touch(elt, t):
                 return True
         return False
-            
+
+# Classe définissant le morceau de bois
+# C'est un cercle de centre (0,0) et dont le diametre est demandé au lancement
+class Environnement:
+    # Crée le bout de bois
+    def __init__(self, diametre):
+        self.rayon = diametre / 2
+        self.x = 0
+        self.y = 0
+    
+    # Dessine le bout de bois
+    def dessin(self):
+        tab = np.arange(0, 2 * np.pi, 0.01)  # matrice, définit l'étendu du domaine et la précision
+        c = self.x + self.rayon * np.cos(tab)  # calcule les coordonnées x du cercle à dessiner
+        s = self.y + self.rayon * np.sin(tab)  # calcule les coordonnées y du cercle à dessiner
+        return c, s
+
+      
 
