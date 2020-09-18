@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as pl
 
 
-from cercleclass import Cercle
+from cercleclass import Cercle, Environnement
 
 
 
@@ -27,11 +27,18 @@ os.mkdir('bmp')#on crée le fichier temporaire où on stocke les images
 #nbindividus = 10
 #precision = 200
 
-def drill(nbslides, nbindividus, precision):
+def drill(nbslides, nbindividus, precision, diametre):
     lslides =[]
     lcentres = []
+
+    env = Environnement(diametre)
     #je sais pas si c'est nécessaire mais sinon ça renvoie une erreur
-    firstcercle = Cercle(600*rd.random(), 600*rd.random(), 0, 0)
+    first_x = rd.uniform(-env.rayon,-env.rayon)
+    first_y = rd.uniform(-env.rayon,-env.rayon)
+    while first_x**2 + first_y**2 > env.rayon**2:
+        first_x = rd.uniform(-env.rayon, env.rayon)
+        first_y = rd.uniform(-env.rayon, env.rayon)
+    firstcercle = Cercle(first_x, first_y, 0, 0)
     lcentres.append(firstcercle)
     lslides.append(lcentres)
     # on fait grandir le premier individu sur tous les slides
@@ -40,12 +47,20 @@ def drill(nbslides, nbindividus, precision):
         tmp = lslides[k][0]
         # on est obligé de créer un nouvel objet cercle sur chaque slide
         groscercle = Cercle(tmp.coordX, tmp.coordX, tmp.rayon+(1/np.sqrt(k+1))*tmp.croissance, tmp.order)
+        v_mur_X = 0
+        v_mur_Y = 0
+        if env.collision(groscercle):
+            groscercle = env.vecteur_mur(groscercle)
         L.append(groscercle)
         lslides.append(L)
     # on ajoute les individus les uns après les autres
     for i in range(1, nbindividus):
         # nouvel individu ajouté sur la première slide
-        newcercle = Cercle(rd.uniform(-1000,1000), rd.uniform(-1000,1000), 0, i)
+        new_x, new_y = rd.uniform(-env.rayon,-env.rayon), rd.uniform(-env.rayon,-env.rayon)
+        while new_x**2 + new_y**2 > env.rayon**2:
+            new_x = rd.uniform(-env.rayon,env.rayon)
+            new_y = rd.uniform(-env.rayon,env.rayon)
+        newcercle = Cercle(new_x, new_y, 0, i)
         lslides[0].append(newcercle)
         for j in range(1,nbslides+1):
             gg = lslides[j-1][i]
@@ -62,29 +77,38 @@ def drill(nbslides, nbindividus, precision):
             # on vérifie sur chaque slides si les individus déjà présents sont touchés ou pas
             for elt in lslides[j]: 
                 if elt.alive: # La collision ne concerne que les tarets vivants
-                    if gg.touch(elt, j):
+                    if env.collision(elt): # on vérifie la position par rapport au mur
+                        v_mur_X, v_mur_Y = env.vecteur_mur(elt,False)
+                        vX += v_mur_X
+                        vY += v_mur_Y
+                    if gg.touch(elt, j): # puis par rapport aux autres
                         # si il y a contact on calcule le décalage
-                        vX += (gg.coordX - elt.coordX)*1.2
-                        vY += (gg.coordY - elt.coordY)*1.2  
+                        vX += (gg.coordX - elt.coordX)*1
+                        vY += (gg.coordY - elt.coordY)*1 
             vL = np.sqrt(vX ** 2 + vY ** 2)
             #on applique le décalage
             saveX, saveY = tmp.coordX, tmp.coordY
-            if vL != 0 :
-                tmp.coordX = (vX/vL)*(2/np.sqrt(j+1))*tmp.croissance + tmp.coordX
-                tmp.coordY = (vY/vL)*(2/np.sqrt(j+1))*tmp.croissance + tmp.coordY
+            if vL != 0 : # Si le vecteur de repositionnement est non nul
+                # Permet d'obtenir le vecteur de bonne taille
+                tmp.coordX = (vX/vL)*(1/np.sqrt(j+1))*tmp.croissance + tmp.coordX
+                tmp.coordY = (vY/vL)*(1/np.sqrt(j+1))*tmp.croissance + tmp.coordY
                 # Cette boucle permet de gerer les collisions, on recalcule la position du trou 
                 # On compte le nombre de calcul avec repositionning
                 repositionning = 0
-                while tmp.cut(lslides[j],j):
+                while tmp.cut(lslides[j],j) or env.collision(tmp):
                     vXb, vYb = 0, 0
+                    if env.collision(tmp):
+                        v_mur_X, v_mur_Y = env.vecteur_mur(tmp,False)
+                        vXb += v_mur_X
+                        vYb += v_mur_Y
                     for elt in lslides[j]:
                         if tmp.touch(elt, j):
-                            vXb += (gg.coordX - elt.coordX)*1.2
+                            vXb += (gg.coordX - elt.coordX)*1
 
-                            vYb += (gg.coordY - elt.coordY)*1.2 
+                            vYb += (gg.coordY - elt.coordY)*1 
                     vLb = np.sqrt(vXb ** 2 + vYb ** 2)
-                    tmp.coordX = (vXb/vLb)*(2/np.sqrt(j+1))*tmp.croissance + tmp.coordX
-                    tmp.coordY = (vYb/vLb)*(2/np.sqrt(j+1))*tmp.croissance + tmp.coordY
+                    tmp.coordX = (vXb/vLb)*(1/np.sqrt(j+1))*tmp.croissance + tmp.coordX
+                    tmp.coordY = (vYb/vLb)*(1/np.sqrt(j+1))*tmp.croissance + tmp.coordY
                     repositionning +=1
                     if repositionning > precision: # Si on a fait trop de calcul c'est qui est pris au piege
                         print("Un taret s'arrete ! ") # En lisant la console tu peux savoir combien se sont arretes

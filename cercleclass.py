@@ -60,5 +60,24 @@ class Environnement:
         s = self.y + self.rayon * np.sin(tab)  # calcule les coordonnées y du cercle à dessiner
         return c, s
 
+    # Sert à voir si l'individu (cercle) touche le bord
+    def collision(self, cercle):
+        return cercle.rayon + np.sqrt((cercle.coordX - self.x)**2 +(cercle.coordY -self.y)**2) > self.rayon
+    
+    # Sert à calculer le vecteur de repositionnement pour échapper au mur
+    # l'argument first sert à ne pas trop répéter de code (il ne sert que pour le premier individu)
+    def vecteur_mur(self, cercle, first=True):
+        d_centre = np.sqrt((cercle.coordX - self.x)**2 +(cercle.coordY -self.y)**2)
+        bonne_norme = cercle.rayon - (self.rayon - d_centre)
+        v_mur_X = self.x - cercle.coordX
+        v_mur_Y = self.y - cercle.coordY
+        vL = np.sqrt(v_mur_X**2 + v_mur_Y**2)
+        if first:
+            cercle.coordX += (bonne_norme/vL) * v_mur_X
+            cercle.coordY += (bonne_norme/vL) * v_mur_Y
+            return cercle
+        else:
+            return (bonne_norme/vL) *v_mur_X, (bonne_norme/vL) *v_mur_Y   
+
       
 
