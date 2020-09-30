@@ -61,6 +61,8 @@ def drill(nbslides, nbindividus, precision, diametre):
             new_x = rd.uniform(-env.rayon,env.rayon)
             new_y = rd.uniform(-env.rayon,env.rayon)
         newcercle = Cercle(new_x, new_y, 0, i)
+        newcercle.croissance = rd.uniform(5,10)
+        
         lslides[0].append(newcercle)
         for j in range(1,nbslides+1):
             gg = lslides[j-1][i]
@@ -72,15 +74,16 @@ def drill(nbslides, nbindividus, precision, diametre):
                 lslides[j].append(cercle_mort)
                 continue
             tmp = Cercle(gg.coordX, gg.coordY, gg.rayon + (1/np.sqrt(j))*gg.croissance, gg.order)
+            tmp.croissance = gg.croissance
             vX = 0
             vY = 0
+            if env.collision(gg): # on vérifie la position par rapport au mur
+                        v_mur_X, v_mur_Y = env.vecteur_mur(gg,False)
+                        vX += v_mur_X
+                        vY += v_mur_Y
             # on vérifie sur chaque slides si les individus déjà présents sont touchés ou pas
             for elt in lslides[j]: 
                 if elt.alive: # La collision ne concerne que les tarets vivants
-                    if env.collision(elt): # on vérifie la position par rapport au mur
-                        v_mur_X, v_mur_Y = env.vecteur_mur(elt,False)
-                        vX += v_mur_X
-                        vY += v_mur_Y
                     if gg.touch(elt, j): # puis par rapport aux autres
                         # si il y a contact on calcule le décalage
                         vX += (gg.coordX - elt.coordX)*1
@@ -114,6 +117,8 @@ def drill(nbslides, nbindividus, precision, diametre):
                         print("Un taret s'arrete ! ") # En lisant la console tu peux savoir combien se sont arretes
                         tmp.alive = False # on le stoppe
                         break
+                if env.collision(tmp):
+                    tmp.alive = False
             lslides[j].append(tmp)
     return(lslides)
 

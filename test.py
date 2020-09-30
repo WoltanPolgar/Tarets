@@ -7,16 +7,25 @@ import os
 import moviepy.editor as mp
 from cercleclass import Environnement
 
-diametre = int(input("Quel est le diamètre du bois ? "))
-nbslides = int(input("Quelle est la profondeur du bois ? "))
-nbind = int(input("Combien d'individus ? "))
-precision = int(input("Quel degré de précision des collisions ? (>150) "))
-anim = int(input("Est-ce  qu'on fait une animation 3d ? (0 = non, 1 = oui) "))
-gif = int(input("On affiche l'animation et on sauvegarde un gif ? (0 = non, 1 = oui) "))
+## permet de lancer vite
+auto = int(input("Choisissez :\n 1 - lancement auto \n 2 - choix des paramètres \n"))
 
-lslides = drill(nbslides, nbind, precision, diametre)
+if auto == 2:
+    diametre = int(input("Quel est le diamètre du bois ? "))
+    nbslides = int(input("Quelle est la profondeur du bois ? "))
+    nbind = int(input("Combien d'individus ? "))
+    precision = int(input("Quel degré de précision des collisions ? (>150) "))
+    anim = int(input("Est-ce  qu'on fait une animation 3d ? (0 = non, 1 = oui) "))
+    gif = int(input("On affiche l'animation et on sauvegarde un gif ? (0 = non, 1 = oui) "))
+    lslides = drill(nbslides, nbind, precision, diametre)
 
-np.random.seed(19680801)
+else :
+    diametre = 2000
+    lslides = drill(300,30,200,2000)
+    anim = 0
+    gif = 1
+
+np.random.seed(19680801) # c'est pour la 3D je crois
 
 if gif != 0:
     j=0

@@ -1,5 +1,5 @@
 import numpy as np
-
+import random as rd
 
 # On crée la classe Cercle pour que ce soit plus facile de les utiliser
 class Cercle :
@@ -9,7 +9,7 @@ class Cercle :
         self.rayon = rayon
         self.grow = True
         self.order = order
-        self.croissance = 5 
+        self.croissance = rd.uniform(5, 10)
         self.alive = True
 
     # on peut afficher les attributs d'un cercle (self)
@@ -33,6 +33,13 @@ class Cercle :
     def touch(self, autre, t):
         d = np.sqrt((self.coordX-autre.coordX)**2 + (self.coordY - autre.coordY)**2)
         return(d <= (self.rayon + autre.rayon+(2/np.sqrt(t))*self.croissance))
+
+    def copy(self):
+        cercle_copy = Cercle(self.coox, self.y,self.rayon, self.order)
+        cercle_copy.croissance = self.croissance
+        cercle_copy.alive = self.alive
+        cercle_copy.grow = self.grow
+        return cercle_copy
     
     
     
@@ -62,13 +69,13 @@ class Environnement:
 
     # Sert à voir si l'individu (cercle) touche le bord
     def collision(self, cercle):
-        return cercle.rayon + np.sqrt((cercle.coordX - self.x)**2 +(cercle.coordY -self.y)**2) > self.rayon
+        return cercle.rayon + np.sqrt((cercle.coordX - self.x)**2 +(cercle.coordY -self.y)**2) >= self.rayon
     
     # Sert à calculer le vecteur de repositionnement pour échapper au mur
     # l'argument first sert à ne pas trop répéter de code (il ne sert que pour le premier individu)
     def vecteur_mur(self, cercle, first=True):
         d_centre = np.sqrt((cercle.coordX - self.x)**2 +(cercle.coordY -self.y)**2)
-        bonne_norme = cercle.rayon - (self.rayon - d_centre)
+        bonne_norme = self.rayon - (cercle.rayon - d_centre)
         v_mur_X = self.x - cercle.coordX
         v_mur_Y = self.y - cercle.coordY
         vL = np.sqrt(v_mur_X**2 + v_mur_Y**2)
